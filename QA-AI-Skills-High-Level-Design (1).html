@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QA AI Skills - High-Level Design</title>
+<style>
+:root{
+  --bg:#ffffff; --panel:#ffffff; --side:#f3f6fa; --ink:#1a1f2b; --mute:#5b6577; --line:#dbe2ec;
+  --acc:#005daa; --acc-soft:#e3eef8; --brand:#005daa; --brand-deep:#003168; --gold:#ffd200; --on-brand:#ffffff;
+  --ok:#1e7b46; --ok-soft:#e3f2e9; --warn:#9a6a00; --warn-soft:#fff6d1;
+  --bad:#c0392b; --bad-soft:#fbe8e6; --code:#eef2f7; --kbd:#e3e9f1;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#0e1420; --panel:#151d2b; --side:#111827; --ink:#e8edf5; --mute:#9aa6b8; --line:#253047;
+  --acc:#6fb1ff; --acc-soft:#16294a; --brand:#003168; --brand-deep:#00214a; --gold:#ffd200; --on-brand:#ffffff;
+  --ok:#5bc489; --ok-soft:#14291e; --warn:#ffd24d; --warn-soft:#2c2610;
+  --bad:#ef7468; --bad-soft:#331b19; --code:#1b2433; --kbd:#202b3d;}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.layout{display:grid;grid-template-columns:280px minmax(0,1fr);min-height:100vh;width:100%}
+nav{background:var(--side);border-right:1px solid var(--line);position:sticky;top:0;height:100vh;overflow-y:auto;padding:18px 14px 40px}
+nav .brand{font-weight:700;font-size:16px;margin:0 0 2px}
+nav .ver{color:var(--mute);font-size:12px;margin-bottom:14px}
+nav a{display:block;color:var(--ink);text-decoration:none;padding:5px 9px;border-radius:7px;font-size:14px}
+nav a.sub{padding-left:22px;font-size:13px;color:var(--mute)}
+nav a:hover{background:var(--panel)}
+nav a.on{background:var(--acc-soft);color:var(--acc)}
+main{padding:0 16px 80px;min-width:0}
+header.hero{padding:30px 0 22px;border-bottom:1px solid var(--line);margin-bottom:8px}
+header.hero h1{font-size:32px;margin:0 0 6px;letter-spacing:-.01em}
+header.hero p{margin:0;color:var(--mute);font-size:16px}
+section{padding:26px 0 8px;border-bottom:1px solid var(--line)}
+h2{font-size:24px;margin:0 0 12px;letter-spacing:-.01em}
+h3{font-size:18px;margin:24px 0 8px}
+h4{font-size:15px;margin:18px 0 6px}
+p{margin:8px 0}
+a{color:var(--acc)}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;font-size:13px;background:var(--code);padding:1px 5px;border-radius:5px}
+pre{background:var(--code);border:1px solid var(--line);border-radius:9px;padding:12px 14px;overflow-x:auto;font-size:13px;line-height:1.5}
+pre code{background:none;padding:0}
+table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0 14px}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{background:var(--side);font-size:13px;color:var(--mute);font-weight:600}
+tr:last-child td{border-bottom:none}
+.wrap{overflow-x:auto}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin:12px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card h4{margin:0 0 6px}
+.card p{margin:4px 0;color:var(--mute);font-size:14px}
+.note,.tip,.warn{border-radius:10px;padding:11px 14px;margin:12px 0;border:1px solid var(--line)}
+.note{background:var(--acc-soft)} .tip{background:var(--ok-soft)} .warn{background:var(--warn-soft)}
+.note b:first-child,.tip b:first-child,.warn b:first-child{margin-right:4px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps>li{counter-increment:s;position:relative;padding:8px 0 8px 42px}
+.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:28px;height:28px;border-radius:50%;background:var(--acc);color:var(--panel);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+.pill{display:inline-block;padding:1px 9px;border-radius:10px;font-size:12px;font-weight:600}
+.p-ok{background:var(--ok-soft);color:var(--ok)} .p-warn{background:var(--warn-soft);color:var(--warn)} .p-bad{background:var(--bad-soft);color:var(--bad)} .p-mute{background:var(--side);color:var(--mute)}
+.chat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:10px 0;font-size:14px}
+.chat .who{font-size:12px;color:var(--mute);font-weight:600;margin-bottom:4px}
+.check div{padding:2px 0}
+kbd{background:var(--kbd);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 6px;font-size:12px}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin:12px 0}
+.flow .box{flex:1 1 160px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
+.flow .box b{display:block;margin-bottom:2px}
+.flow .arr{align-self:center;color:var(--mute);font-size:18px}
+.menu-btn{display:none}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  nav{position:fixed;inset:0 30% 0 0;z-index:5;transform:translateX(-102%);transition:transform .2s;height:100vh}
+  nav.open{transform:none;box-shadow:0 0 40px rgba(0,0,0,.25)}
+  .menu-btn{display:inline-block;position:fixed;right:12px;top:12px;z-index:6;background:var(--acc);color:var(--panel);border:0;border-radius:8px;padding:7px 12px;font:inherit}
+  header.hero h1{font-size:26px}
+  .flow .arr{display:none}
+}
+
+/* RBC theme: brand blue band with a gold rule, blue navigation, gold markers */
+header.hero{background:linear-gradient(120deg,var(--brand-deep),var(--brand));color:var(--on-brand);margin:0 -16px 8px;padding:34px 24px 26px;border-bottom:5px solid var(--gold)}
+header.hero h1{color:var(--on-brand)}
+header.hero p{color:rgba(255,255,255,.86)}
+header.hero .tag{display:inline-block;background:var(--gold);color:#1a1f2b;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;border-radius:4px;padding:2px 9px;margin-bottom:10px}
+nav{border-right:4px solid var(--brand)}
+nav .brand{color:var(--brand)}
+@media (prefers-color-scheme: dark){nav .brand{color:var(--acc)}}
+nav a.on{background:var(--brand);color:var(--on-brand);box-shadow:inset 4px 0 0 var(--gold)}
+h2{color:var(--brand);border-left:5px solid var(--gold);padding-left:10px}
+@media (prefers-color-scheme: dark){h2{color:var(--acc)}}
+th{background:var(--brand);color:var(--on-brand)}
+.steps>li::before{background:var(--brand);color:var(--on-brand);box-shadow:0 0 0 2px var(--gold)}
+.note{border-left:5px solid var(--brand)} .tip{border-left:5px solid var(--ok)} .warn{border-left:5px solid var(--gold)}
+.card{border-top:4px solid var(--brand)}
+.flow .box{border-top:4px solid var(--gold)}
+.menu-btn{background:var(--brand);color:var(--on-brand)}
+.arch .lab{background:var(--brand);color:var(--on-brand);border-left:5px solid var(--gold)}
+@media print{nav,.menu-btn{display:none}.layout{display:block}}
+
+.arch{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.arch .layer{display:grid;grid-template-columns:190px minmax(0,1fr);gap:10px;align-items:stretch}
+.arch .lab{background:var(--acc);color:var(--panel);border-radius:10px;padding:10px 12px;font-weight:600;font-size:13px;display:flex;align-items:center}
+.arch .cells{display:flex;flex-wrap:wrap;gap:8px}
+.arch .cell{flex:1 1 180px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
+.arch .cell small{color:var(--mute)}
+@media (max-width:900px){.arch .layer{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<button class="menu-btn" onclick="document.querySelector('nav').classList.toggle('open')">Contents</button>
+<div class="layout">
+<nav>
+  <div class="brand">QA AI Skills</div>
+  <div class="ver">High-Level Design · version 0.1</div>
+  <a href="#purpose">1. Purpose and scope</a>
+  <a href="#principles">2. Design principles</a>
+  <a href="#architecture">3. Architecture</a>
+  <a class="sub" href="#arch-components">Components</a>
+  <a class="sub" href="#arch-mcp">AI tools (MCP)</a>
+  <a href="#knowledge">4. Knowledge pipeline</a>
+  <a class="sub" href="#kn-qa">QA repository</a>
+  <a class="sub" href="#kn-dev">Development code</a>
+  <a class="sub" href="#kn-store">Knowledge store</a>
+  <a href="#generation">5. Script generation</a>
+  <a class="sub" href="#gen-stages">Stages</a>
+  <a class="sub" href="#gen-understand">Understanding</a>
+  <a class="sub" href="#gen-locators">Locators</a>
+  <a class="sub" href="#gen-gate">Quality gate</a>
+  <a href="#execution">6. Execution and proof</a>
+  <a class="sub" href="#exe-watch">Run watchdog</a>
+  <a class="sub" href="#exe-proof">Two-pass proof</a>
+  <a class="sub" href="#exe-handover">Promote and handover</a>
+  <a href="#coverage">7. Coverage engine</a>
+  <a class="sub" href="#cov-items">Item model</a>
+  <a class="sub" href="#cov-evidence">Evidence model</a>
+  <a class="sub" href="#cov-rules">Status rules</a>
+  <a class="sub" href="#cov-priority">Priority</a>
+  <a class="sub" href="#cov-regression">Regression</a>
+  <a class="sub" href="#cov-compare">Compared with other approaches</a>
+  <a href="#setup">8. Installer</a>
+  <a href="#scale">9. Scale and performance</a>
+  <a href="#security">10. Security and compliance</a>
+  <a href="#quality">11. Testing the skills</a>
+  <a href="#limits">12. Known limits and next steps</a>
+  <a href="#glossary">13. Glossary</a>
+</nav>
+<main>
+<header class="hero">
+  <div class="tag">Internal · QA Automation</div>
+  <h1>QA AI Skills · High-Level Design</h1>
+  <p>How the skills learn a Robot Framework repository, generate and prove scripts, and measure automation coverage against the development code.</p>
+</header>
+
+<section id="purpose">
+<h2>1. Purpose and scope</h2>
+<p>QA teams spend most of their automation time on work a machine can do reliably once it understands the repository: finding the right keyword, the right locator, the right login and route, then running and fixing until the test is stable. QA AI Skills does that work inside the team's own AI editor, using the team's own code as the source of truth, and leaves the decisions (approval, commit, release) with people.</p>
+<div class="grid">
+  <div class="card"><h4>Goal 1 · Quality that never drops</h4><p>Reuse before creating; prove every new locator live; two passes on the same code; never weaken an expected result; full knowledge, checked for completeness.</p></div>
+  <div class="card"><h4>Goal 2 · Speed</h4><p>Scripts write the facts and the AI only the meaning; batches; resume; draft-first for known steps; runs that never hang; one-call handover.</p></div>
+  <div class="card"><h4>Goal 3 · Measurable coverage</h4><p>A coverage map, gap analysis and regression gap analysis built from evidence: what the code contains against what the tests really do.</p></div>
+  <div class="card"><h4>Goal 4 · Enterprise safety</h4><p>Read-only by default, approvals for every change, no secrets or client data anywhere, nothing leaves the machine except through the editor already in use.</p></div>
+</div>
+<h3>In scope</h3>
+<ul>
+  <li>Robot Framework repositories using SeleniumLibrary (including Selenium2Library) and/or the Browser library; Robot Framework 3.2 and newer.</li>
+  <li>Editors: Devin Desktop, VS Code with GitHub Copilot, VS Code with Claude Code.</li>
+  <li>Test case input: Markdown and text files in many layouts, CSV exports, qTest (read-only), mock screens, plain requests.</li>
+  <li>Optional development repositories (read-only), old and new front-end and back-end frameworks.</li>
+</ul>
+<h3>Out of scope</h3>
+<ul>
+  <li>Changing development code, building it or deploying it.</li>
+  <li>Production environments.</li>
+  <li>Writing to qTest or any test management tool.</li>
+  <li>Automatic commits, pushes or merges.</li>
+</ul>
+</section>
+
+<section id="principles">
+<h2>2. Design principles</h2>
+<div class="wrap"><table>
+<tr><th>Principle</th><th>What it means in practice</th><th>Why</th></tr>
+<tr><td>Scripts write facts, the AI writes meaning</td><td>Parsing, indexing, rendering, matching, counting and checking are deterministic Python. The AI writes short meaning lines, understands test cases and makes judgement calls.</td><td>Facts become complete and repeatable; AI tokens go only where judgement is needed.</td></tr>
+<tr><td>Evidence over guesses</td><td>Development screens link to tests by the same IDs, URLs and labels; coverage is matched on locators and checked texts; every status carries its reason and proving tests.</td><td>Results can be checked by a person and trusted by a manager.</td></tr>
+<tr><td>Reuse first</td><td>Team keywords and locators, then those created earlier in the batch, then new ones; the quality gate blocks copies.</td><td>Scripts look like the team's own; maintenance stays low.</td></tr>
+<tr><td>Prove, then keep</td><td>Every new locator is proven on the live page; every test passes twice on the same code before it is verified.</td><td>No "looks right" scripts reach the team.</td></tr>
+<tr><td>Load only what the stage needs</td><td>A short core skill is always read; stage files (understand, reach, locators, write-run, qtest, mock, batch) are read only when that stage starts. Knowledge is read per module.</td><td>Fewer tokens and faster answers without losing rules.</td></tr>
+<tr><td>Never hang, never lose work</td><td>Every command returns within about a minute; long work runs in the background; state is saved after each batch or run; every flow can resume.</td><td>Large repositories and unstable environments are normal in enterprises.</td></tr>
+<tr><td>People decide</td><td>Approval before adding to suites, branching, committing; changed checks need an OK; the AI settles routine choices itself and lists them as notes.</td><td>Control stays with the team without slowing it down with questions.</td></tr>
+</table></div>
+</section>
+
+<section id="architecture">
+<h2>3. Architecture</h2>
+<div class="arch">
+  <div class="layer"><div class="lab">People</div><div class="cells"><div class="cell">Tester · types a command, checks cards, approves</div><div class="cell">Manager · reads the coverage map and regression report</div></div></div>
+  <div class="layer"><div class="lab">AI editor</div><div class="cells"><div class="cell">Devin Desktop</div><div class="cell">VS Code + GitHub Copilot</div><div class="cell">VS Code + Claude Code</div></div></div>
+  <div class="layer"><div class="lab">Skills (instructions)</div><div class="cells"><div class="cell">qa-knowledge-setup<br><small>+ app, keyword, locator, dev builders, reviewer</small></div><div class="cell">robot-script-generator<br><small>core + stage files</small></div></div></div>
+  <div class="layer"><div class="lab">Helper scripts (Python, no AI)</div><div class="cells"><div class="cell">extract_repo · extract_dev · split_extract · knowledge_build</div><div class="cell">tc_reader · script_check · ai_session</div><div class="cell">ai_run · bg_job · listener</div><div class="cell">coverage</div></div></div>
+  <div class="layer"><div class="lab">AI tools (MCP)</div><div class="cells"><div class="cell">robotmcp (rf-mcp)</div><div class="cell">playwright · attach · session</div><div class="cell">qtest (read-only)</div></div></div>
+  <div class="layer"><div class="lab">Sources and targets</div><div class="cells"><div class="cell">QA repo (tests, keywords, locators)</div><div class="cell">Knowledge store (qa-ai-skills/knowledge)</div><div class="cell">Development repos (dev/, read-only)</div><div class="cell">Application under test (test environments)</div></div></div>
+</div>
+<p>The editor's AI reads the skills and calls the helper scripts through the terminal and the AI tools through MCP. Everything the skills create lives in <code>qa-ai-skills/</code> inside the QA repo; development repos are cloned next to it, never inside.</p>
+
+<h3 id="arch-components">Components</h3>
+<div class="wrap"><table>
+<tr><th>Component</th><th>Kind</th><th>Responsibility</th></tr>
+<tr><td><code>qa-ai-setup.cmd / .sh</code>, <code>qa_ai_setup.py</code></td><td>Installer</td><td>Finds the right Python, installs the MCP servers if missing, writes the chosen editor's MCP settings, qTest, slash commands, git-ignore lines, self-tests</td></tr>
+<tr><td><code>qa-knowledge-setup.md</code></td><td>Skill</td><td>The 7-step knowledge build, refresh, dev, status, coverage and regression flows</td></tr>
+<tr><td>app-, keyword-, locator-, dev-knowledge-builder, knowledge-reviewer</td><td>Skills</td><td>How to write each kind of meaning and how to review it</td></tr>
+<tr><td><code>robot-script-generator.md</code> + <code>generator/*.md</code></td><td>Skill</td><td>Core rules (always read) and stage instructions (read on demand)</td></tr>
+<tr><td><code>extract_repo.py</code></td><td>Script</td><td>Parses the QA repo with Robot's own parser (in parallel, cached) into tests, keywords, locators, variables, libraries</td></tr>
+<tr><td><code>extract_dev.py</code></td><td>Script</td><td>Reads development code: screens, elements, rules, conditions, API calls and their triggers, endpoints, business checks, roles, status changes, outside systems</td></tr>
+<tr><td><code>split_extract.py</code></td><td>Script</td><td>Cuts the extract into module briefs with fingerprints; hands out the next batch most-used first; records finished modules</td></tr>
+<tr><td><code>knowledge_build.py</code></td><td>Script</td><td>Worksheets for the AI, rendering of knowledge files from facts plus meaning, completeness check, report, compare, migrate</td></tr>
+<tr><td><code>tc_reader.py</code></td><td>Script</td><td>Indexes test case files of any layout, packets, cards, batch status, changed checks, learning of proven steps</td></tr>
+<tr><td><code>script_check.py</code></td><td>Script</td><td>The quality gate and Robot dry run; metrics</td></tr>
+<tr><td><code>ai_session.py</code></td><td>Robot library (AI runs only)</td><td>Runs known steps in one call, checks and rates locators live, suggests locators from the screen's controls</td></tr>
+<tr><td><code>ai_activity_indicator.py</code></td><td>Robot listener (AI runs only)</td><td>The browser badge, step timing, heartbeat and safe stop</td></tr>
+<tr><td><code>ai_run.py</code></td><td>Script</td><td>Timing, run recording, pass counting, the watchdog, promote, summary, suggestions, finish</td></tr>
+<tr><td><code>bg_job.py</code></td><td>Script</td><td>Background jobs with short status calls, so no command blocks the editor</td></tr>
+<tr><td><code>coverage.py</code></td><td>Script</td><td>Coverage map, gap analysis, regression gap analysis, reports</td></tr>
+<tr><td><code>qtest_mcp.py</code></td><td>MCP server</td><td>Read-only qTest access over its REST API, token from <code>.env</code> or the team's vault</td></tr>
+</table></div>
+
+<h3 id="arch-mcp">AI tools (MCP servers)</h3>
+<div class="wrap"><table>
+<tr><th>Server</th><th>Used for</th><th>Not used for</th></tr>
+<tr><td>robotmcp</td><td>Running the team's keywords live (login, navigation), proving locators in the real session</td><td>Final proof runs (those are normal Robot runs)</td></tr>
+<tr><td>playwright</td><td>Mock screens and standalone pages</td><td>Pages that need the application's login</td></tr>
+<tr><td>playwright-attach</td><td>Reading a new screen in the browser rf-mcp opened (SeleniumLibrary with Chrome or Edge)</td><td>Firefox</td></tr>
+<tr><td>playwright-session</td><td>A second window with the same login (Browser library, or when attaching is not possible)</td><td>Applications that keep the login only in session storage (the saved screen is read instead)</td></tr>
+<tr><td>qtest</td><td>Reading test cases by ID</td><td>Any write to qTest</td></tr>
+</table></div>
+</section>
+
+<section id="knowledge">
+<h2>4. Knowledge pipeline</h2>
+<div class="flow">
+  <div class="box"><b>1 · Extract</b>extract_repo / extract_dev: facts as JSON, no AI</div><div class="arr">→</div>
+  <div class="box"><b>2 · Plan</b>split_extract plan: module briefs, fingerprints, changed modules</div><div class="arr">→</div>
+  <div class="box"><b>3 · Batches</b>next: most-used first, ~60 KB per pass; AI writes meaning; record</div><div class="arr">→</div>
+  <div class="box"><b>4 · Render</b>knowledge files from facts + meaning</div><div class="arr">→</div>
+  <div class="box"><b>5 · Check</b>completeness check, reviewer, report</div>
+</div>
+<h3 id="kn-qa">QA repository</h3>
+<ul>
+  <li><b>Parsing</b> uses Robot Framework's own parser (3.2 and newer), so every suite format Robot accepts is read the same way: <code>.robot</code>, <code>.resource</code>, <code>.txt</code>, <code>.tsv</code>, pipe-separated. Files the installed Robot cannot parse are listed, never dropped.</li>
+  <li><b>Parallel and resumable:</b> changed files are parsed in parallel processes when there are 200 or more; a content-hash cache skips unchanged files; progress is saved every 250 files.</li>
+  <li><b>Libraries per suite</b> are traced through shared resources; Selenium2Library and its extended variants are treated as SeleniumLibrary.</li>
+  <li><b>Run configuration</b> is read, not assumed: vault loaders, <code>.env</code>, variable files, command-line variables, argument files, suite setups.</li>
+</ul>
+<h3 id="kn-dev">Development code</h3>
+<p>A front end is detected from build files and from the page files themselves, so older applications without a <code>package.json</code> are found. Pages are read the same way whatever the framework.</p>
+<div class="wrap"><table>
+<tr><th>Facts</th><th>Where they come from</th></tr>
+<tr><td>Screens and routes</td><td>Router definitions (React, Angular, Vue, Next.js, AngularJS <code>$routeProvider</code> / ui-router), controller views (Spring MVC, ASP.NET MVC), Struts actions, page files served from web roots</td></tr>
+<tr><td>Elements</td><td>Inputs, dropdowns, checkboxes, buttons, links, tabs, including server-side tags (Spring form, JSF/PrimeFaces, Struts, ASP.NET, Grails); ids, test IDs, names, model bindings, labels (also from <code>messages*.properties</code>)</td></tr>
+<tr><td>Rules and conditions</td><td>required, length, pattern, min/max; schema validations with messages; shown/enabled/required-when conditions (<code>*ngIf</code>, <code>v-if</code>, <code>ng-show</code>, <code>th:if</code>, <code>&lt;c:if&gt;</code>, <code>rendered=</code>)</td></tr>
+<tr><td>Behaviour</td><td>API calls and the button that triggers each (handler function traced up to 3 calls deep; form submits; on-load calls); messages and navigation after the call</td></tr>
+<tr><td>Back end</td><td>Endpoints, request fields and their rules, business checks with messages, role rules, status changes</td></tr>
+<tr><td>Outside systems</td><td>Feign and SOAP clients, RestTemplate / WebClient / HttpClient calls, JMS and Kafka messages, traced from each endpoint's handler through the services it calls</td></tr>
+</table></div>
+<h3 id="kn-store">Knowledge store</h3>
+<pre><code>qa-ai-skills/knowledge/
+  app/                 screens, flows, journeys per module (AI meaning)
+  meaning/             short meaning lines the rendered files are built from
+  keyword-knowledge*   rendered: every keyword, level, purpose, screens, flows
+  locator-knowledge*   rendered: every locator, type, stability, duplicates, screens
+  app-map              rendered: routes, proof elements, direct transitions
+  run-config.md        how tests run (facts + team settings)
+  dev/                 development knowledge pages
+  coverage/            coverage reports and decisions
+  build-state.json     what was built from which fingerprint (resume, refresh)
+  .extract/            raw facts (git-ignored)</code></pre>
+<p>The knowledge format is versioned (format 4). A refresh migrates older knowledge and re-renders it; <code>knowledge_build.py compare</code> proves in numbers that nothing was lost.</p>
+</section>
+
+<section id="generation">
+<h2>5. Script generation</h2>
+<h3 id="gen-stages">Stages</h3>
+<div class="wrap"><table>
+<tr><th>Stage</th><th>Checklist steps</th><th>What happens</th><th>Instructions read</th></tr>
+<tr><td>0</td><td>-</td><td>Checklist in the editor's task list; resume if a run was interrupted</td><td>understand.md</td></tr>
+<tr><td>1</td><td>1-2</td><td>Understand the request and the test case, plan the route (no browser)</td><td>understand.md</td></tr>
+<tr><td>1b</td><td>-</td><td>The one prompt: test case cards and the environment</td><td>understand.md</td></tr>
+<tr><td>2</td><td>3-4</td><td>Check the environment, log in once, reach the screen in one call</td><td>reach.md</td></tr>
+<tr><td>3</td><td>5-6</td><td>Only for new parts: development code, the screen's controls, then Playwright; prove every locator</td><td>locators.md</td></tr>
+<tr><td>4</td><td>7</td><td>Write the draft; quality gate</td><td>write-run.md</td></tr>
+<tr><td>5</td><td>8-9</td><td>Watched headed runs, diagnosis, fixes, summary, handover</td><td>write-run.md</td></tr>
+<tr><td>6-7</td><td>-</td><td>Add to the suite, branch and commit, only on yes</td><td>write-run.md</td></tr>
+</table></div>
+<p>Batch (<code>batch.md</code>), qTest (<code>qtest.md</code>) and mock (<code>mock.md</code>) instructions are read only when used.</p>
+
+<h3 id="gen-understand">Understanding test cases</h3>
+<ul>
+  <li><b>Indexing:</b> <code>tc_reader.py</code> finds test cases in any layout (story headings over test case headings at mixed levels, Gherkin scenarios, numbered titles, bold IDs, one table for all, CSV). It checks the count against the file's own index and names any IDs or headings it did not read.</li>
+  <li><b>Packets:</b> the AI reads each test case once, with only the catalog rows it uses and the file's reading rules.</li>
+  <li><b>Cards:</b> a structured understanding (goal, data, steps with marks ➕ added, ≈ made concrete, ⚠ check) is rendered by script as one card per test case, never as a paragraph.</li>
+  <li><b>Changed checks:</b> any check that differs from the test case's exact expected result is recorded with <code>tc_reader.py change</code>, shown as ⚠ on the card, and blocks verification until the user's OK.</li>
+  <li><b>Learning:</b> steps and catalog names proven in passing runs are saved (names only, never data) and reused by later test cases.</li>
+</ul>
+<h3>Draft first, explore only what is new</h3>
+<p>A test case whose every step is covered by existing keywords (with the screen's proof element in the app map) is written straight from the knowledge and goes to run 1, which is its proof. Only test cases with new steps open the live session, and only to reach the first new screen and prove its new elements. A known step that fails in run 1 is diagnosed first, then inspected live from the last passing step.</p>
+<h3 id="gen-locators">Locator strategy</h3>
+<ol>
+  <li>Existing team locator, then one created earlier in the batch.</li>
+  <li>From the development code: test ID, then a stable id or name, then label or visible text.</li>
+  <li>From the screen's controls list in the live session.</li>
+  <li>Playwright, only if still needed.</li>
+</ol>
+<p>Auto-generated ids are rejected. Every new locator is proven in the live session in one call and rated Strong, Good or Weak; Weak ones carry the test ID to ask developers for. Stale team locators are reported as suggestions, never changed.</p>
+<h3 id="gen-gate">Quality gate (<code>script_check.py</code>)</h3>
+<div class="grid">
+  <div class="card"><h4>Blocks</h4><p>Sleep, secrets, URLs or client data in code, AI helper libraries, inline locators, fragile locators, missing result checks, SQL writes and shared-data changes without restore, missing ai-generated tag, dry-run errors.</p></div>
+  <div class="card"><h4>Warns, settled by the AI</h4><p>Reuse warnings (existing keyword or locator does the same; the AI reuses or writes <code># kept new: reason</code>), checks that ignore case or spacing (must be recorded as changed checks), possible data changes.</p></div>
+  <div class="card"><h4>Style</h4><p>The repo's Robot version syntax (<code>:FOR</code>/<code>Run Keyword If</code> on 3.x up to <code>VAR</code> on 7), the library imported exactly as the suite does, the repo's file format.</p></div>
+</div>
+</section>
+
+<section id="execution">
+<h2>6. Execution and proof</h2>
+<div class="flow">
+  <div class="box"><b>bg_job start</b>Robot runs in the background with the AI listener</div><div class="arr">→</div>
+  <div class="box"><b>ai_run watch</b>Short looks (≤45 s); slow vs stuck; safe stop</div><div class="arr">→</div>
+  <div class="box"><b>ai_run run</b>Results per test with code fingerprints</div><div class="arr">→</div>
+  <div class="box"><b>ai_run final</b>Next run: only tests short of two passes</div><div class="arr">→</div>
+  <div class="box"><b>ai_run finish</b>Promote, summary, suggestions, handover</div>
+</div>
+<h3 id="exe-watch">Run watchdog</h3>
+<p>The listener writes a heartbeat next to the results: the running test, the stack of open keywords with start times, each step's own wait limit, and the locator a click or wait acts on (never typed values).</p>
+<div class="wrap"><table>
+<tr><th>Rule</th><th>Detail</th></tr>
+<tr><td>Allowance for the deepest running step</td><td>The largest of: 3 × its slowest earlier time (and at least that + 60 s); its own wait limit + 60 s; for a step never seen, the library's limit (page load timeout, 300 s by default for SeleniumLibrary; action timeout for Browser) + 60 s</td></tr>
+<tr><td>Moving, never stopped</td><td>Any keyword starting or ending resets the clock, so polling loops and retries are never treated as stuck</td></tr>
+<tr><td>Confirmation</td><td>Over the allowance on two looks at least 30 s apart, with no event in between</td></tr>
+<tr><td>Evidence</td><td>The step, how long, the allowance and its basis, the API and outside systems behind the element (development knowledge), and the optional health URL's answer</td></tr>
+<tr><td>Stop ladder</td><td>1 · stop request → the listener raises an interrupt inside Robot (like Ctrl+C: the test fails, teardowns run, output is written) · 2 · after 60 s a second request forces the stop · 3 · after 120 s the process tree is ended</td></tr>
+<tr><td>Classification</td><td>The test is BLOCKED (environment), not FAIL: no fix attempt, no script change; tests using the same step wait; others can run; a run without complete output is rebuilt from the heartbeat</td></tr>
+</table></div>
+<h3 id="exe-proof">Two-pass proof</h3>
+<p>Each run records, per test, a fingerprint of everything the test executes: its own lines, the keywords and variables it uses (resolved transitively, including embedded-argument keywords) and its suite's setup and teardown lines. A pass counts only while that fingerprint is unchanged. <code>final</code> lists the tests still short of two passes and prints the <code>--test</code> options for exactly those; skipped and blocked tests are not rerun. When the team marks tests parallel-safe in <code>run-config.md</code> and pabot is installed, it prints a pabot command instead.</p>
+<h3 id="exe-handover">Promote and handover</h3>
+<ul>
+  <li><b>Promote</b> moves proven tests from <code>drafts/</code> to <code>verified/</code>, with exactly the keywords and variables they use; drafts keep only the rest and import the verified resource; <code>DRAFTS-NOTE.md</code> records why each remaining test is there and what it needs.</li>
+  <li><b>Summary</b>: where the time went, the runs in plain words, fix attempts, locator sources and ratings, slowest steps, runs not completed.</li>
+  <li><b>Faster code suggestions</b> are mandatory: each slow keyword's existing code next to a complete faster version; the check fails while one is missing; suggestions survive a rewritten summary.</li>
+  <li><b>finish</b> does the whole handover in one call and refuses while a test still needs a pass.</li>
+</ul>
+</section>
+
+<section id="coverage">
+<h2>7. Coverage engine</h2>
+<p><code>coverage.py</code> measures automation against the development code. It is deterministic, read-only, standard-library Python, and produces a manager summary, a gap list, an Excel matrix, an offline HTML report, a JSON snapshot (for trends) and test cases for the top gaps.</p>
+<h3 id="cov-items">Item model</h3>
+<div class="wrap"><table>
+<tr><th>Type</th><th>ID example</th><th>Default group</th></tr>
+<tr><td>Screen</td><td><code>SCR:/requests/new</code></td><td>Happy path</td></tr>
+<tr><td>Field / Button</td><td><code>FLD:/requests/new#customerName</code>, <code>ACT:/requests/new#saveBtn</code></td><td>Happy path</td></tr>
+<tr><td>Validation rule</td><td><code>RULE:/requests/new#customerName:required</code></td><td>Negative or Boundary</td></tr>
+<tr><td>Condition</td><td><code>COND:/requests/new#lei:shown</code></td><td>Conditional</td></tr>
+<tr><td>Role rule</td><td><code>ROLE:/clients/:id#approve</code>, <code>ROLE:KYC_APPROVER@KycService.approve</code></td><td>Roles / security</td></tr>
+<tr><td>API call</td><td><code>API:POST /api/requests</code></td><td>Happy path (N/A when no screen calls it)</td></tr>
+<tr><td>Message</td><td><code>MSG:POST /api/requests:request-saved</code></td><td>Happy path or Negative</td></tr>
+<tr><td>Business rule / status change</td><td><code>BR:RequestService.submit:bmc-validation-failed</code>, <code>TRN:...:approved</code></td><td>Negative / Status flow</td></tr>
+<tr><td>Server validation</td><td><code>SRV:POST /api/clients#lei:size-max-20</code></td><td>Boundary or Negative</td></tr>
+<tr><td>Outside system</td><td><code>INT:BMC</code></td><td>Integration</td></tr>
+<tr><td>Dropdown options</td><td><code>OPT:/requests/new#reqType</code></td><td>Data variation</td></tr>
+</table></div>
+<p>IDs are built from routes, element keys, class and method names and message text, not line numbers, so they stay stable across builds. Each item carries its source file and line and a fingerprint of its defining facts.</p>
+<h3 id="cov-evidence">Evidence model</h3>
+<ul>
+  <li>Every automated test is expanded through its keywords, binding positional, named and default arguments and resolving variables and locators, down to the library actions it performs (memoised per keyword and argument set).</li>
+  <li>Actions are classified: set a value, click, check shown, check hidden, check disabled, check text, navigate. <code>Run Keyword ...</code> wrappers are unwrapped; <code>Run Keyword And Expect Error</code> marks a negative test.</li>
+  <li>Locators are reduced to tokens (id, test ID, name, model binding, partial id, visible text) and matched to development elements.</li>
+  <li>Per test the engine keeps: elements touched and how, checked texts, value lengths and option names (never values), a fingerprint of the user who logged in, and intent words (negative, role-negative) from names and documentation.</li>
+</ul>
+<h3 id="cov-rules">Status rules (summary)</h3>
+<div class="wrap"><table>
+<tr><th>Item</th><th>Covered when</th><th>Partial when</th></tr>
+<tr><td>Field</td><td>A test sets a value</td><td>Tests only look at it</td></tr>
+<tr><td>Button</td><td>A test clicks it</td><td>Tests only check it is there</td></tr>
+<tr><td>Required / pattern rule</td><td>Its message is checked, or a test enters an empty / invalid value with matching intent</td><td>The field is only filled validly</td></tr>
+<tr><td>Length / range rule</td><td>Its message is checked, or a value of the limit's length is entered</td><td>The field is filled, the limit is never tried</td></tr>
+<tr><td>Condition</td><td>Both sides are checked</td><td>One side only</td></tr>
+<tr><td>Role rule</td><td>Tested with two or more users, or with a user lacking the right</td><td>One user only</td></tr>
+<tr><td>API call</td><td>A test clicks the triggering button, or opens the screen for on-load calls</td><td>The screen is reached, the trigger is not clicked</td></tr>
+<tr><td>Message / business rule / status change</td><td>Its text (or the new status) is checked</td><td>The call is made, the text is not checked</td></tr>
+<tr><td>Outside system</td><td>Success and failure outcomes are checked</td><td>Reached, but failure handling (or any outcome) is not checked</td></tr>
+<tr><td>Dropdown options</td><td>Every option is used</td><td>Some options are used</td></tr>
+<tr><td>Screen</td><td>Reached, and at least half its fields and buttons used</td><td>Reached, fewer used</td></tr>
+</table></div>
+<p>Coverage % = (Covered + ½ Partial) ÷ testable items. Items reachable only by API are N/A and reported separately. Decisions in <code>decisions.md</code> (<code>&lt;ID&gt; | &lt;status&gt; | &lt;reason&gt;</code>) override the computed status on every build and are marked in every report.</p>
+<h3 id="cov-priority">Priority</h3>
+<p>Score = base weight by type (business rule and role rule 32, outside system 30, status change 26, screen 26, API 18, rule 18, condition 16, server validation 14, message 14, field and button 12, options 6) × 1.0 for a Gap, 0.8 for a Partial on a risky item (outside system, business rule, role rule, status change), 0.55 for other Partials; plus up to 20 for recent code changes (4 per commit in 180 days, first import excluded), 8 for money or personal-data fields, 6 for items behind outside systems, and 4 per outside-system call on an unreached screen. P1 ≥ 30, P2 ≥ 18, else P3. The reasons are written next to every gap.</p>
+<h3 id="cov-regression">Regression gap analysis</h3>
+<ol>
+  <li><code>git diff --unified=0 base..head</code> on each development repo gives changed files and line ranges.</li>
+  <li>An item is changed when its source line falls in (or within 3 lines of) a changed range; a screen when any of its files changed; an outside system when its client changed, which also marks every API call that uses it.</li>
+  <li>Tests to run = the proving tests of every changed item, plus tests that reach changed screens.</li>
+  <li>Regression gaps = changed items that are Gap or Partial, ranked by priority.</li>
+</ol>
+<p>Without git history, the JSON snapshot still gives "changed since the last build" from item fingerprints. If a ref is missing from a shallow clone, the exact fetch command is shown and the user is asked before it runs.</p>
+<h3 id="cov-compare">Compared with other approaches</h3>
+<div class="wrap"><table>
+<tr><th>Approach</th><th>What it does well</th><th>What we take</th><th>What we add</th></tr>
+<tr><td>Spec Kit <code>/speckit.analyze</code></td><td>Requirement keys, a coverage table, severity-ranked findings, read-only and repeatable</td><td>Stable keys, severity, deterministic re-runs, read-only</td><td>Measures real tests against real code instead of documents against documents</td></tr>
+<tr><td>AI-DLC</td><td>Traceability from requirements through design to tests; reverse engineering of existing code; no orphaned artifacts</td><td>Traceability both ways, reverse-engineered facts as the base</td><td>Evidence per item (proving tests, reason), automatic gap test cases</td></tr>
+<tr><td>Risk-based regression testing</td><td>Prioritises by change, complexity, usage and business impact</td><td>Change-based and impact-based priority</td><td>Line-level change impact on concrete UI and business items, with the exact tests to run</td></tr>
+<tr><td>Code coverage tools</td><td>Which lines run under tests</td><td>-</td><td>Business view: which rules, conditions, roles and integrations are checked, not just executed</td></tr>
+</table></div>
+</section>
+
+<section id="setup">
+<h2>8. Installer</h2>
+<ul>
+  <li><b>One command</b> on Windows, macOS and Linux; registers <code>qa-ai-setup</code> on the user's PATH without admin rights; Devin is the default editor.</li>
+  <li><b>Chosen editor only:</b> MCP settings and slash commands for that editor; anything an earlier install created for another editor is removed (only exact copies of its own files), with backups in <code>qa-ai-skills/backup/</code>.</li>
+  <li><b>Merge, never replace:</b> only its own entries are added to MCP files; user entries, comments and formatting are kept; an entry of the user's with the same name is reported, not replaced; committed team files are left alone.</li>
+  <li><b>qTest:</b> URL, project and token source (paste, masked, saved only to <code>.env</code>; or a vault key name), with Back at every question.</li>
+  <li><b>Proof:</b> every MCP server is started once and every self-test runs; coloured status lines with cause and fix; <code>check</code> changes nothing.</li>
+</ul>
+</section>
+
+<section id="scale">
+<h2>9. Scale and performance</h2>
+<div class="wrap"><table>
+<tr><th>Concern</th><th>Design</th></tr>
+<tr><td>Tens of thousands of tests</td><td>Parallel parsing (≥200 changed files), content-hash cache, progress saved every 250 files; JSON brief cache keyed on extract stamps</td></tr>
+<tr><td>Editor responsiveness</td><td>Every command returns within about a minute; long work in <code>bg_job</code> with 45-second status calls</td></tr>
+<tr><td>AI cost</td><td>Facts by script; batches of about 60 KB of worksheet, up to 8 modules per pass; staged skill loading; packets with only the catalog rows a test case uses</td></tr>
+<tr><td>Interruptions</td><td>Build state, batch status, run state and the heartbeat are saved continuously; every flow resumes</td></tr>
+<tr><td>Early use</td><td>Most-used modules first; a module not built yet is built on demand before a script uses it</td></tr>
+<tr><td>Run time</td><td>One login per suite; reruns only for tests short of two passes; optional parallel runs; faster-code suggestions for slow keywords</td></tr>
+<tr><td>Coverage at scale</td><td>Keyword expansion memoised per argument set; token indexes for matching; the HTML report pages its item list</td></tr>
+</table></div>
+</section>
+
+<section id="security">
+<h2>10. Security and compliance</h2>
+<ul>
+  <li><b>Read-only by default:</b> team tests, keywords and locators are changed only after approval; development repos are never changed, built, installed or committed; qTest is read-only.</li>
+  <li><b>Secrets:</b> only from the vault, configuration or <code>.env</code>; never typed into chat, shown, logged, or written into code, comments, tags, knowledge, metrics or reports; a pasted token is masked.</li>
+  <li><b>Client data:</b> no client IDs or data values in generated code, knowledge or reports; coverage keeps lengths and option names only; user identities in coverage are fingerprints.</li>
+  <li><b>Environments:</b> test environments only; production-looking targets stop the run.</li>
+  <li><b>Data safety:</b> exploration never clicks Save, Submit, Delete or Approve; tests that change shared data restore it in teardown; a stopped run still runs its teardowns.</li>
+  <li><b>Change control:</b> asks before adding to suites, branching, committing or pushing; drafts and session files are never committed; MCP settings with machine paths are git-ignored.</li>
+  <li><b>Offline outputs:</b> the HTML reports load nothing from the internet; no telemetry.</li>
+  <li><b>Transparency:</b> plain-text Python and Markdown, no compiled or encoded code, so security teams can review everything.</li>
+</ul>
+</section>
+
+<section id="quality">
+<h2>11. Testing the skills</h2>
+<p>Every helper script carries a self-test with sample repositories built on the fly; the installer runs them all.</p>
+<div class="wrap"><table>
+<tr><th>Script</th><th>Checks</th><th>Script</th><th>Checks</th></tr>
+<tr><td>extract_repo</td><td>16</td><td>tc_reader</td><td>40</td></tr>
+<tr><td>extract_dev</td><td>48</td><td>ai_run</td><td>22</td></tr>
+<tr><td>dev_repos</td><td>30</td><td>ai_session</td><td>8</td></tr>
+<tr><td>script_check</td><td>24</td><td>bg_job</td><td>6</td></tr>
+<tr><td>split_extract</td><td>23</td><td>coverage</td><td>13</td></tr>
+<tr><td>knowledge_build</td><td>24</td><td>qa_ai_setup</td><td>39</td></tr>
+<tr><td>qtest_mcp</td><td>15</td><td></td><td></td></tr>
+</table></div>
+<p>The samples include modern front ends, AngularJS 1.x inside Spring Boot, Spring MVC with JSP, JSF, Thymeleaf, ASP.NET Web Forms and Razor, plain jQuery pages and Struts 2, an outside-system chain (controller → service → Feign and RestTemplate clients), test case files in many layouts, a stalled run, and a git history for regression.</p>
+</section>
+
+<section id="limits">
+<h2>12. Known limits and next steps</h2>
+<h3>Known limits</h3>
+<ul>
+  <li>Development facts are static: screens built entirely at run time and rules kept only in a database are not seen.</li>
+  <li>Coverage matching relies on ids, test IDs, names, model bindings and visible texts; tests that act only through generic XPath may be under-counted (corrected through decisions).</li>
+  <li>Frameworks that build screens in code (Vaadin, GWT, Wicket) are read from their page files only; their screens are found live during generation.</li>
+  <li>Robot Framework older than 3.2 cannot be parsed for the knowledge build (a newer Robot in a separate environment can be used just for the build).</li>
+  <li>An editor's own action limit (for example Devin's Continue) is outside the skills' control.</li>
+</ul>
+<h3>Next steps (planned, not built)</h3>
+<ul>
+  <li>Distribution as a Python package through the company's internal package repository (one install command, scanned and versioned).</li>
+  <li>Optional enabling of the editor's auto-continue setting from the installer, once its storage is confirmed.</li>
+  <li>An API-test generator for items marked N/A in coverage.</li>
+</ul>
+</section>
+
+<section id="glossary">
+<h2>13. Glossary</h2>
+<div class="wrap"><table>
+<tr><th>Term</th><th>Meaning</th></tr>
+<tr><td>MCP</td><td>Model Context Protocol: how the editor's AI uses tools such as rf-mcp, Playwright and qTest</td></tr>
+<tr><td>Knowledge</td><td>What the skills learned about the repository, stored in <code>qa-ai-skills/knowledge/</code></td></tr>
+<tr><td>Meaning line</td><td>A short AI-written line describing a keyword or screen, combined with script facts to render the knowledge</td></tr>
+<tr><td>Card</td><td>The rendered understanding of one test case, shown for approval before work starts</td></tr>
+<tr><td>Changed check</td><td>A check that differs from the test case's exact expected result; needs the user's OK</td></tr>
+<tr><td>Two-pass proof</td><td>A test is verified only after two passes on the same code</td></tr>
+<tr><td>BLOCKED</td><td>A test stopped because the environment did not answer; not a script failure</td></tr>
+<tr><td>Covered / Partial / Gap / N/A</td><td>Coverage statuses (section 7)</td></tr>
+<tr><td>Release tag</td><td>A named point in the development repo's history, used as the base of a regression analysis</td></tr>
+<tr><td>Regression gap</td><td>An item changed between two versions that no test fully covers</td></tr>
+</table></div>
+</section>
+</main>
+</div>
+
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav a'));
+  var targets=links.map(function(a){return document.querySelector(a.getAttribute('href'))}).filter(Boolean);
+  function onScroll(){
+    var y=window.scrollY+120, cur=targets[0];
+    targets.forEach(function(t){ if(t.offsetTop<=y) cur=t; });
+    links.forEach(function(a){ a.classList.toggle('on', cur && a.getAttribute('href')==='#'+cur.id); });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+  links.forEach(function(a){ a.addEventListener('click', function(){ document.querySelector('nav').classList.remove('open'); }); });
+})();
+</script>
+</body>
+</html>
