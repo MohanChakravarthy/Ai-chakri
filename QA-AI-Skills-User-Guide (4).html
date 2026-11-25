@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QA AI Skills User Guide</title>
+<style>
+:root{
+  --brand:#005daa; --brand-deep:#003168; --brand-soft:#e8f1fa; --gold:#ffd200; --gold-soft:#fff8d6;
+  --ink:#1b2430; --ink-2:#4a5565; --line:#dde3ea; --bg:#ffffff; --panel:#f6f8fb;
+  --ok:#1a7f37; --ok-soft:#e8f5ec; --warn:#9a6700; --warn-soft:#fff6db; --bad:#b42318; --bad-soft:#fdecea;
+  --mono:"Cascadia Code","SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  --sans:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --side:272px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 var(--sans)}
+a{color:var(--brand)}
+code{font-family:var(--mono);font-size:.88em;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:1px 5px;white-space:nowrap}
+
+/* top bar */
+.top{position:fixed;inset:0 0 auto 0;height:60px;background:var(--brand-deep);color:#fff;display:flex;align-items:center;gap:14px;padding:0 24px;z-index:20;border-bottom:3px solid var(--gold)}
+.top .mark{width:30px;height:30px;border-radius:6px;background:var(--gold);color:var(--brand-deep);display:grid;place-items:center;font-weight:800;font-size:14px}
+.top .name{font-weight:600;font-size:16px;letter-spacing:.2px}
+.top .tag{margin-left:auto;font-size:12.5px;opacity:.85}
+.menu-btn{display:none;background:none;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:5px 10px;font-size:14px;cursor:pointer}
+
+/* side navigation */
+.side{position:fixed;top:60px;bottom:0;left:0;width:var(--side);background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;padding:22px 14px 30px;z-index:10}
+.side .group{font-size:11px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--ink-2);margin:18px 12px 6px}
+.side .group:first-child{margin-top:0}
+.side a{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:14px}
+.side a .n{width:22px;height:22px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;font-size:11.5px;color:var(--ink-2);flex:none}
+.side a:hover{background:#eaf0f6}
+.side a.active{background:var(--brand-soft);color:var(--brand-deep);font-weight:600;box-shadow:inset 3px 0 0 var(--brand)}
+.side a.active .n{background:var(--brand);border-color:var(--brand);color:#fff}
+.side a.soon .n{background:var(--gold-soft);border-color:#ecd77a}
+
+/* content */
+main{margin-left:var(--side);padding:92px 48px 64px}
+.wrap{max-width:980px}
+.hero{background:linear-gradient(135deg,var(--brand-deep),var(--brand));color:#fff;border-radius:10px;padding:30px 34px;margin-bottom:34px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,210,0,.16)}
+.hero h1{margin:0 0 8px;font-size:28px;line-height:1.25}
+.hero p{margin:0;max-width:720px;opacity:.95}
+.hero .meta{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
+.hero .chip{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:3px 12px;font-size:12.5px}
+section{padding:8px 0 30px;border-bottom:1px solid var(--line);margin-bottom:30px}
+section:last-of-type{border-bottom:none}
+h2{font-size:22px;color:var(--brand-deep);margin:0 0 6px;display:flex;align-items:center;gap:12px}
+h2 .n{width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:14px;flex:none}
+h2 + .lead{color:var(--ink-2);margin:0 0 18px}
+h3{font-size:16.5px;margin:26px 0 8px;color:var(--ink)}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 14px;padding-left:22px}
+li{margin:4px 0}
+
+/* tables */
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;margin:12px 0 18px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{background:var(--brand-soft);color:var(--brand-deep);text-align:left;font-weight:600;padding:10px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td code{white-space:normal}
+
+/* callouts */
+.note{border-radius:8px;padding:13px 16px;margin:14px 0 18px;border:1px solid;font-size:14.2px}
+.note b:first-child{display:block;margin-bottom:2px}
+.note.info{background:var(--brand-soft);border-color:#bcd5ee}
+.note.tip{background:var(--ok-soft);border-color:#b7dfc3}
+.note.warn{background:var(--warn-soft);border-color:#f0d58a}
+.note.gold{background:var(--gold-soft);border-color:#ecd77a}
+
+/* steps */
+.steps{counter-reset:s;list-style:none;padding:0;margin:14px 0 18px}
+.steps > li{counter-increment:s;position:relative;padding:2px 0 16px 46px;margin:0}
+.steps > li:before{content:counter(s);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;background:var(--gold);color:var(--brand-deep);font-weight:700;display:grid;place-items:center;font-size:14px}
+.steps > li:not(:last-child):after{content:"";position:absolute;left:14.5px;top:34px;bottom:2px;width:1px;background:var(--line)}
+.steps > li > b{display:block;margin-bottom:2px}
+
+/* cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:14px 0 18px}
+.card{border:1px solid var(--line);border-radius:8px;padding:16px 18px;background:#fff}
+.card h4{margin:0 0 6px;font-size:15px;color:var(--brand-deep)}
+.card p{margin:0;font-size:14px;color:var(--ink-2)}
+.card.soon{background:var(--gold-soft);border-color:#ecd77a}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border-radius:4px;padding:2px 7px;background:var(--gold);color:var(--brand-deep);vertical-align:middle;margin-left:6px}
+
+/* terminal and chat pictures */
+figure{margin:14px 0 20px}
+figcaption{font-size:12.5px;color:var(--ink-2);margin-top:6px}
+.term{background:#0f1b2b;color:#d6e2ef;border-radius:8px;font:13px/1.6 var(--mono);padding:0 0 14px;overflow-x:auto;border:1px solid #0a1320}
+.term .bar{display:flex;gap:6px;padding:9px 12px;background:#172739;border-radius:8px 8px 0 0;margin-bottom:10px}
+.term .bar i{width:10px;height:10px;border-radius:50%;background:#3b4d63;display:block}
+.term pre{margin:0;padding:0 16px;white-space:pre}
+.t-ok{color:#56d364}.t-warn{color:#e3b341}.t-cy{color:#79c0ff}.t-dim{color:#7d8ea3}.t-gold{color:#ffd200}.t-b{font-weight:700;color:#fff}
+.chat{border:1px solid var(--line);border-radius:8px;background:#fbfcfe;padding:16px 18px;font-size:14px}
+.chat .who{font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px}
+.chat .msg{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:12px}
+.chat .msg.me{background:var(--brand-soft);border-color:#bcd5ee}
+.chat .check{list-style:none;padding:0;margin:0}
+.chat .check li{margin:3px 0}
+.chat .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chat .btns span{border:1px solid var(--brand);color:var(--brand);border-radius:16px;padding:3px 12px;font-size:13px;background:#fff}
+.chat table{font-size:13px}
+.chat th{white-space:normal}
+
+.folders{font:13.5px/1.7 var(--mono);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 18px;overflow-x:auto;white-space:pre}
+footer{color:var(--ink-2);font-size:12.5px;padding-top:6px}
+
+@media (max-width:900px){
+  .menu-btn{display:block}
+  .top .tag{display:none}
+  .side{transform:translateX(-100%);transition:transform .2s;box-shadow:0 6px 24px rgba(0,0,0,.15)}
+  body.nav-open .side{transform:none}
+  main{margin-left:0;padding:84px 16px 48px}
+  .hero{padding:24px 20px}
+  .hero h1{font-size:23px}
+}
+@media print{.top,.side{display:none}main{margin:0;padding:0}section{break-inside:avoid-page}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <div class="mark">QA</div>
+  <div class="name">QA AI Skills &nbsp;·&nbsp; User Guide</div>
+  <div class="tag">Version 0.1 &nbsp;|&nbsp; For testers</div>
+</header>
+
+<nav class="side" id="side">
+  <div class="group">Get started</div>
+  <a href="#overview"><span class="n">1</span>Overview</a>
+  <a href="#prereq"><span class="n">2</span>Before you start</a>
+  <a href="#install"><span class="n">3</span>Install</a>
+  <a href="#verify"><span class="n">4</span>Check it works</a>
+  <div class="group">Use it</div>
+  <a href="#knowledge"><span class="n">5</span>Build the knowledge</a>
+  <a href="#generate"><span class="n">6</span>Generate scripts</a>
+  <a href="#vague"><span class="n">7</span>Short or vague test cases</a>
+  <a href="#files"><span class="n">8</span>Your files and updates</a>
+  <div class="group">Help</div>
+  <a href="#trouble"><span class="n">9</span>Troubleshooting</a>
+  <a href="#safety"><span class="n">10</span>Safety rules</a>
+  <a href="#soon" class="soon"><span class="n">★</span>Coming soon</a>
+</nav>
+
+<main>
+<div class="wrap">
+
+<div class="hero">
+  <h1>QA AI Skills: user guide</h1>
+  <p>Turn your test cases into clean, working Robot Framework scripts that reuse your team's existing keywords and locators. Install once, build the knowledge once, then generate scripts with one short command in your editor's AI chat.</p>
+  <div class="meta">
+    <span class="chip">Devin Desktop</span><span class="chip">VS Code + GitHub Copilot</span><span class="chip">VS Code + Claude Code</span>
+    <span class="chip">SeleniumLibrary</span><span class="chip">Browser library</span>
+  </div>
+</div>
+
+<!-- 1 -->
+<section id="overview">
+  <h2><span class="n">1</span>Overview</h2>
+  <p class="lead">What the skills do and what you get.</p>
+  <div class="cards">
+    <div class="card"><h4>Learns your repo</h4><p>Reads your tests, keywords, locators and run settings once and keeps them as "knowledge".</p></div>
+    <div class="card"><h4>Writes the script</h4><p>Turns a test case into a Robot Framework test, reusing your existing keywords and locators first.</p></div>
+    <div class="card"><h4>Proves it works</h4><p>Runs the test in a real browser. A test counts as verified only after it passes twice.</p></div>
+    <div class="card"><h4>Asks very little</h4><p>Normally only which environment to use, once. It shows its understanding of each test case for your OK.</p></div>
+  </div>
+  <p>There are two commands, the same in all three editors:</p>
+  <div class="table"><table>
+    <tr><th>Command</th><th>Use it to</th></tr>
+    <tr><td><code>/qa-knowledge-setup</code></td><td>Teach the AI your repository (run once, then refresh after big changes).</td></tr>
+    <tr><td><code>/robot-script-generator</code></td><td>Create and prove scripts from your test cases.</td></tr>
+  </table></div>
+</section>
+
+<!-- 2 -->
+<section id="prereq">
+  <h2><span class="n">2</span>Before you start</h2>
+  <p class="lead">Check these once on your computer. The installer checks them again and tells you what is missing.</p>
+  <div class="table"><table>
+    <tr><th>You need</th><th>Version</th><th>How to check</th><th>Why</th></tr>
+    <tr><td>Python</td><td>3.10 or newer</td><td><code>python --version</code></td><td>Runs Robot Framework and the skills</td></tr>
+    <tr><td>Robot Framework</td><td>The one your repo uses (3.2 to 7.x)</td><td><code>robot --version</code></td><td>Runs the tests. Use the same Python your team runs tests with</td></tr>
+    <tr><td>SeleniumLibrary or Browser library</td><td>The one your repo uses</td><td><code>pip show robotframework-seleniumlibrary</code><br>or <code>pip show robotframework-browser</code></td><td>Drives the browser in your tests</td></tr>
+    <tr><td>Node.js</td><td>18 or newer</td><td><code>node --version</code></td><td>Runs the Playwright tool the AI uses to look at pages</td></tr>
+    <tr><td>Google Chrome or Microsoft Edge</td><td>Any current version</td><td>Open it</td><td>The browser for exploring and running</td></tr>
+    <tr><td>Git</td><td>Any current version</td><td><code>git --version</code></td><td>Reads what changed; needed only for the optional development repos</td></tr>
+    <tr><td>One editor with AI chat</td><td>Devin Desktop, or VS Code with GitHub Copilot or Claude Code</td><td>Open it</td><td>Where you type the commands</td></tr>
+    <tr><td>Your QA repository</td><td>Cloned on your computer</td><td>Your tests run with your usual command</td><td>The skills work inside it</td></tr>
+  </table></div>
+  <div class="note info"><b>You do not configure anything by hand.</b>The installer sets up the Robot Framework MCP, the Playwright MCP, the editor settings, the commands and (if you want) the qTest connection for you.</div>
+  <div class="note tip"><b>Tip</b>If your team uses a virtual environment, activate it before installing, so the installer finds the Python that has Robot Framework.</div>
+</section>
+
+<!-- 3 -->
+<section id="install">
+  <h2><span class="n">3</span>Install</h2>
+  <p class="lead">About 5 minutes, once per computer and repository.</p>
+  <ol class="steps">
+    <li><b>Copy the folder into your QA repo</b>Unzip <code>qa-ai-skills.zip</code> so that the <code>qa-ai-skills</code> folder sits directly in the root of your QA repository, next to your tests.</li>
+    <li><b>Open a terminal in the root of your QA repo</b>In your editor: Terminal &gt; New Terminal. Make sure the path ends with your repo's folder name.</li>
+    <li><b>Run the installer</b>
+      <div class="table"><table>
+        <tr><th>System</th><th>First time</th><th>Later, from any folder in the repo</th></tr>
+        <tr><td>Windows (PowerShell or Command Prompt)</td><td><code>.\qa-ai-skills\qa-ai-setup install</code></td><td><code>qa-ai-setup install</code></td></tr>
+        <tr><td>macOS or Linux</td><td><code>sh qa-ai-skills/qa-ai-setup.sh install</code></td><td><code>qa-ai-setup install</code></td></tr>
+      </table></div>
+    </li>
+    <li><b>Answer two short questions</b>Pick your editor with the arrow keys and Enter. Then choose whether to connect qTest now (optional; you can skip it and do it later).</li>
+    <li><b>Wait for "Setup complete"</b>The installer shows one line with a spinner and a percentage while it works. At the end it says <i>Setup complete. Everything is ready and working.</i></li>
+    <li><b>Restart your editor</b>Close it completely and open it again on your QA repo, so it loads the new AI tools and commands.</li>
+  </ol>
+  <figure>
+    <div class="term"><div class="bar"><i></i><i></i><i></i></div><pre><span class="t-cy t-b">  QA AI Skills</span>  <span class="t-dim">|</span>  <span class="t-b">Setup</span>                                        <span class="t-dim">v0.1</span>
+  <span class="t-dim">Repository  </span>C:\work\qa-automation
+  <span class="t-dim">Your data   </span>C:\work\qa-automation\qa-ai-data
+
+<span class="t-gold">  [1/6]  Checking your computer</span>
+  <span class="t-ok">[ OK ]</span>  Python 3.11.9
+  <span class="t-ok">[ OK ]</span>  Robot Framework 7.1
+  <span class="t-ok">[ OK ]</span>  Node.js 20.17.0
+<span class="t-gold">  [2/6]  Installing the AI tools (only what is missing)</span>
+  <span class="t-ok">[ OK ]</span>  Robot Framework MCP is installed
+  <span class="t-ok">[ OK ]</span>  Playwright MCP is installed
+<span class="t-gold">  [3/6]  Setting up VS Code with GitHub Copilot</span>
+  <span class="t-ok">[ OK ]</span>  GitHub Copilot: AI tools set up
+  <span class="t-ok">[ OK ]</span>  GitHub Copilot: /robot-script-generator and /qa-knowledge-setup commands ready
+<span class="t-gold">  [6/6]  Final check (please wait, about a minute)</span>
+  <span class="t-cy">  ⠹ </span> Please wait: checking the configuration  <span class="t-dim">45%</span>
+
+  <span class="t-ok t-b">Setup complete</span>. Everything is ready and working.</pre></div>
+    <figcaption>What the installer looks like (shortened). Your lines may differ slightly.</figcaption>
+  </figure>
+  <h3>What the installer does for you</h3>
+  <ul>
+    <li>Installs the Robot Framework MCP and the Playwright MCP only if they are missing.</li>
+    <li>Sets up only the editor you chose, and adds the two commands to its chat.</li>
+    <li>Keeps your own editor settings and AI tools exactly as they are, and backs up any file before changing it.</li>
+    <li>Connects qTest if you choose to (read-only). Your token is typed hidden and stored only in your local <code>.env</code>.</li>
+    <li>Adds the AI's working files to <code>.gitignore</code>, so nothing private is committed by mistake.</li>
+    <li>Starts every AI tool once and runs a configuration check to prove everything works.</li>
+  </ul>
+  <div class="note gold"><b>Running it again is safe</b>If everything is already set up, it says <i>Setup is already complete. Nothing to do.</i> If something is missing, it repairs only that. To set everything up again on purpose: <code>qa-ai-setup install --force</code>.</div>
+</section>
+
+<!-- 4 -->
+<section id="verify">
+  <h2><span class="n">4</span>Check it works</h2>
+  <p class="lead">Two quick checks after installing.</p>
+  <ol class="steps">
+    <li><b>Run the check</b><code>qa-ai-setup check</code> starts the AI tools and runs the configuration check without changing anything. It ends with <i>Configuration check passed: everything is working</i>.</li>
+    <li><b>Find the commands in your editor</b>Open the AI chat and type <code>/</code>. You should see <code>/robot-script-generator</code> and <code>/qa-knowledge-setup</code>.
+      <ul>
+        <li><b>Devin Desktop:</b> they appear as skills.</li>
+        <li><b>VS Code with GitHub Copilot:</b> switch the chat to Agent mode first.</li>
+        <li><b>VS Code with Claude Code:</b> approve the project's AI tools the first time Claude Code asks.</li>
+      </ul>
+    </li>
+  </ol>
+  <div class="table"><table>
+    <tr><th>Command</th><th>What it does</th></tr>
+    <tr><td><code>qa-ai-setup install</code></td><td>Installs or repairs. Does nothing if everything is already set up.</td></tr>
+    <tr><td><code>qa-ai-setup install --force</code></td><td>Sets everything up again.</td></tr>
+    <tr><td><code>qa-ai-setup install --editor devin | copilot | claude</code></td><td>Switches to another editor (the old editor's AI files are removed; yours are kept).</td></tr>
+    <tr><td><code>qa-ai-setup check</code></td><td>Checks everything and changes nothing.</td></tr>
+    <tr><td><code>qa-ai-setup help</code></td><td>Lists every option.</td></tr>
+  </table></div>
+</section>
+
+<!-- 5 -->
+<section id="knowledge">
+  <h2><span class="n">5</span>Build the knowledge</h2>
+  <p class="lead">Do this once per repository before generating scripts. Afterwards, refresh it when the repo changes.</p>
+  <div class="table"><table>
+    <tr><th>Command</th><th>What it does</th><th>Example</th></tr>
+    <tr><td><code>/qa-knowledge-setup build</code></td><td>Learns the whole repository: application screens and flows, keywords, locators and run settings.</td><td><code>/qa-knowledge-setup build</code></td></tr>
+    <tr><td><code>/qa-knowledge-setup build &lt;folder or suite&gt;</code></td><td>Learns one folder or suite file and everything it uses. Adds to the existing knowledge.</td><td><code>/qa-knowledge-setup build tests/payments</code></td></tr>
+    <tr><td><code>/qa-knowledge-setup build &lt;topic&gt;</code></td><td>Learns the tests about one topic (matched by file, test name, tags or documentation).</td><td><code>/qa-knowledge-setup build addresses</code></td></tr>
+    <tr><td><code>/qa-knowledge-setup refresh</code></td><td>Updates only what changed since the last build. Also continues a build that was interrupted.</td><td><code>/qa-knowledge-setup refresh</code></td></tr>
+    <tr><td><code>/qa-knowledge-setup rebuild</code></td><td>Builds everything again from scratch.</td><td><code>/qa-knowledge-setup rebuild</code></td></tr>
+    <tr><td><code>/qa-knowledge-setup rebuild &lt;scope&gt;</code></td><td>Builds one folder, suite or topic again from scratch; the rest is kept.</td><td><code>/qa-knowledge-setup rebuild tests/kyc</code></td></tr>
+    <tr><td><code>/qa-knowledge-setup dev</code></td><td>Adds or updates the application's development repositories (optional, read-only) for stronger knowledge.</td><td><code>/qa-knowledge-setup dev</code></td></tr>
+    <tr><td><code>/qa-knowledge-setup status</code></td><td>Shows how complete and up to date the knowledge is. Changes nothing.</td><td><code>/qa-knowledge-setup status</code></td></tr>
+  </table></div>
+  <h3>What happens</h3>
+  <p>The AI shows a 7-step checklist and works through it without stopping. Big repositories are built in batches, most-used areas first, with one progress line per batch.</p>
+  <figure>
+    <div class="chat">
+      <div class="who">AI</div>
+      <div class="msg">
+        <ul class="check">
+          <li>✅ 1. Analysed 214 tests, 380 keywords and 512 locators (24s)</li>
+          <li>⏭ 2. Development code: not included</li>
+          <li>⏳ 3. Learning the application's screens and steps: batch 3 of 8 done</li>
+          <li>⬜ 4. Learning the existing keywords</li>
+          <li>⬜ 5. Learning the existing locators</li>
+          <li>⬜ 6. Reviewing everything against the code</li>
+          <li>⬜ 7. Summary</li>
+        </ul>
+      </div>
+    </div>
+    <figcaption>The build checklist in the chat (example numbers).</figcaption>
+  </figure>
+  <h3>Development repositories (optional)</h3>
+  <p>At the start of a build, the AI asks once whether to include the application's source code. Paste the repository links, or choose <i>No</i> to skip. With the code included, the knowledge also knows real field IDs, dropdown options and validation messages, so new scripts need less exploring.</p>
+  <ul>
+    <li>The code is only read: never changed, built or committed. It goes into a <code>dev</code> folder next to your QA repo.</li>
+    <li>Giving the same repository again does not clone it again; it just updates it to the latest code.</li>
+  </ul>
+  <div class="note tip"><b>Good practice</b>Commit the <code>qa-ai-data/knowledge</code> folder so the whole team shares one knowledge base. Its temporary parts are git-ignored automatically.</div>
+</section>
+
+<!-- 6 -->
+<section id="generate">
+  <h2><span class="n">6</span>Generate scripts</h2>
+  <p class="lead">Give a test case; get a proven script that reuses your existing keywords and locators.</p>
+  <div class="table"><table>
+    <tr><th>Command</th><th>What it does</th></tr>
+    <tr><td><code>/robot-script-generator TC-1234</code></td><td>Finds test case TC-1234 in the repo's test case files and automates it.</td></tr>
+    <tr><td><code>/robot-script-generator qtest TC-1234</code></td><td>Fetches the test case from qTest (read-only), then automates it. Several IDs are allowed: <code>qtest TC-1234 TC-1235</code>.</td></tr>
+    <tr><td><code>/robot-script-generator cases.md all</code></td><td>Automates every test case in a file, as one batch.</td></tr>
+    <tr><td><code>/robot-script-generator cases.md first 10</code></td><td>The first 10 test cases of the file. Also: <code>next 10</code>, <code>5-20</code>, <code>3 7 9</code>, <code>TC-101 TC-102</code>.</td></tr>
+    <tr><td><code>/robot-script-generator cases.md failed</code></td><td>Runs the failed or blocked test cases of the last batch again.</td></tr>
+    <tr><td><code>/robot-script-generator check address type HOME is available</code></td><td>A plain request without a test case: the AI writes the steps, shows them, then automates them.</td></tr>
+    <tr><td><code>/robot-script-generator cases.md TC-1234 mock &lt;link&gt;</code></td><td>A new feature not released yet: builds the test against a mock screen, ready for the release.</td></tr>
+  </table></div>
+  <h3>Test case files it reads</h3>
+  <p>AIDLC test case files, Spec Kit <code>spec.md</code> files (each acceptance scenario is one test case), hand-written <code>.md</code> or <code>.txt</code> files, Gherkin (Given / When / Then), tables, and <code>.csv</code> exports from qTest and other tools. If you have an Excel file, export it as <code>.csv</code> first.</p>
+  <h3>What happens, step by step</h3>
+  <ol class="steps">
+    <li><b>Understands the test case</b>Reads it, finds how your team already does each step, and fills in obvious missing steps (such as logging in or opening the record).</li>
+    <li><b>Shows you its understanding</b>For each test case where it added or clarified something, you see one card. Choose <i>Looks right</i> or type a correction.</li>
+    <li><b>Asks for the environment, once</b>For example QA or UAT. Your answer is remembered for next time. Production is never used.</li>
+    <li><b>Writes and proves the script</b>Reuses your keywords and locators first, explores the live page only for new screens, proves every new locator, and runs the test in a visible browser.</li>
+    <li><b>Hands it over</b>A test that passes twice moves to <code>verified</code>. You get a short summary and are asked before anything is added to your suite, branched or committed.</li>
+  </ol>
+  <h3>How a generated script looks</h3>
+  <p>Every reused team keyword is marked, so reviewers see at a glance what is existing and what is new:</p>
+  <div class="term"><div class="bar"><i></i><i></i><i></i></div><pre><span class="t-dim">*** Test Cases ***</span>
+<span class="t-b">TC-1234 Approve a submitted KYC case</span>
+    [Tags]    ai-generated    kyc
+    <span class="t-dim"># Step 1: Log in as the approver</span>
+    <span class="t-dim"># Reused: Login To Portal (resources/common.resource)</span>
+    Login To Portal    ${APPROVER_USER}
+    <span class="t-dim"># Step 2: Open the client's case</span>
+    <span class="t-dim"># Reused: Search Client (resources/client.resource)</span>
+    Search Client    ${CLIENT_SUBMITTED}
+    <span class="t-dim"># Step 3: Approve the case</span>
+    Click Approve Button
+    Wait Until Page Contains    Case approved</pre></div>
+  <h3>Where the scripts go</h3>
+  <div class="table"><table>
+    <tr><th>Folder</th><th>Contains</th></tr>
+    <tr><td><code>qa-ai-data/ai_generated_tests/drafts</code></td><td>Scripts still being proven. Never committed.</td></tr>
+    <tr><td><code>qa-ai-data/ai_generated_tests/verified</code></td><td>Scripts that passed twice, ready for review.</td></tr>
+    <tr><td><code>qa-ai-data/results</code></td><td>Run reports and summaries.</td></tr>
+  </table></div>
+</section>
+
+<!-- 7 -->
+<section id="vague">
+  <h2><span class="n">7</span>Short or vague test cases</h2>
+  <p class="lead">Test cases such as "Verify the subscription works" are rewritten from the knowledge and shown to you before anything runs.</p>
+  <p>The AI completes the test case using what it already knows about your application:</p>
+  <div class="table"><table>
+    <tr><th>What is missing</th><th>Where the AI finds it</th></tr>
+    <tr><td>The keyword for a step</td><td>The steps your team's tests already use for the same flow</td></tr>
+    <tr><td>A screen it does not know</td><td>The development code (if added), then a short look at the live application</td></tr>
+    <tr><td>Test data ("a client", an empty data cell)</td><td>Data your passing tests already use, your test data files, a read-only database lookup, then a search in the application</td></tr>
+    <tr><td>A vague expected result ("works as expected")</td><td>The exact message or result the application shows for that action</td></tr>
+  </table></div>
+  <figure>
+    <div class="chat">
+      <div class="who">AI</div>
+      <div class="msg">
+        <b>Test case 1 of 3 · TC-900 · rewritten, please confirm</b><br>
+        <b>As written in the test case:</b> <i>1. Open a client 2. Subscribe to VOC (expected: works as expected)</i>
+        <div class="table" style="margin:10px 0 6px"><table>
+          <tr><th>#</th><th>Step</th><th>Expected result</th><th>From</th></tr>
+          <tr><td>1</td><td>➕ Log in as a VOC user</td><td>Home page shows</td><td>closest existing test</td></tr>
+          <tr><td>2</td><td>≈ Open a client with no VOC subscription</td><td>Client page shows</td><td>test data used by your tests</td></tr>
+          <tr><td>3</td><td>≈ Subscribe the client to VOC</td><td>"Client subscribed to VOC successfully" is shown</td><td>message in the application</td></tr>
+        </table></div>
+        ➕ 1 added from the knowledge · ≈ 2 made concrete
+        <div class="btns"><span>Looks right, next</span><span>Looks right, approve all</span><span>I'll type a correction</span></div>
+      </div>
+    </div>
+    <figcaption>A rewritten test case card. ➕ means added, ≈ means made concrete, ⚠ means please check.</figcaption>
+  </figure>
+  <div class="note warn"><b>Your expected results are never weakened</b>If the AI has to check something different from your exact wording, the card marks it as a changed check, and that test counts as verified only after your OK.</div>
+</section>
+
+<!-- 8 -->
+<section id="files">
+  <h2><span class="n">8</span>Your files and updates</h2>
+  <p class="lead">Two folders sit at the root of your QA repo.</p>
+  <div class="folders">&lt;your QA repo&gt;/
+  qa-ai-skills/    the package: skills and tools. Safe to replace with a newer version.
+  qa-ai-data/      YOUR DATA: knowledge, generated tests, results, backups.
+  tests/ ...       your team's files (never changed without your approval)</div>
+  <h3>Updating to a newer version</h3>
+  <ol class="steps">
+    <li><b>Replace the package folder</b>Replace <code>qa-ai-skills</code> with the new one. Your data in <code>qa-ai-data</code> is not touched.</li>
+    <li><b>Run the installer</b><code>qa-ai-setup install</code> applies the update.</li>
+    <li><b>Refresh the knowledge</b><code>/qa-knowledge-setup refresh</code> applies any new knowledge rules.</li>
+  </ol>
+  <div class="note warn"><b>Coming from an older version?</b>Older versions kept the knowledge inside <code>qa-ai-skills</code>. Unzip the new package <b>over</b> the old folder (do not delete it first) and run <code>qa-ai-setup install</code> once. It moves your knowledge and tests to <code>qa-ai-data</code>. From then on, you can simply replace the folder.</div>
+</section>
+
+<!-- 9 -->
+<section id="trouble">
+  <h2><span class="n">9</span>Troubleshooting</h2>
+  <p class="lead">Every warning in the installer also prints its cause and fix. The full details are in <code>qa-ai-data/results/setup-log.txt</code>.</p>
+  <h3>Installation</h3>
+  <div class="table"><table>
+    <tr><th>What you see</th><th>Likely cause</th><th>What to do</th></tr>
+    <tr><td>Python was not found</td><td>Python is not installed or not on the PATH</td><td>Install Python 3.10 or newer (or ask IT), open a new terminal, run the installer again.</td></tr>
+    <tr><td>Robot Framework was not found in this Python</td><td>Robot is installed in a different Python or virtual environment</td><td>Activate your team's virtual environment, then run the installer again.</td></tr>
+    <tr><td>Node.js is missing or too old</td><td>Node.js below 18</td><td>Install Node.js 18 or newer, open a new terminal, run the installer again.</td></tr>
+    <tr><td>Robot Framework MCP or Playwright MCP could not be installed</td><td>No internet access for pip or npm, or a company proxy</td><td>Ask IT to allow pip and npm, or install the package the message names, then run the installer again.</td></tr>
+    <tr><td>Neither Chrome nor Edge was found</td><td>No supported browser</td><td>Install Google Chrome or Microsoft Edge.</td></tr>
+    <tr><td>No .robot files found in this repository</td><td>The folder is not in the root of the QA repo</td><td>Move <code>qa-ai-skills</code> to the repo root and run the installer from there.</td></tr>
+    <tr><td><code>qa-ai-setup</code> is not recognised</td><td>The terminal was opened before the first install</td><td>Open a new terminal, or use the first-time command from section 3.</td></tr>
+    <tr><td>The commands do not appear in the chat</td><td>The editor was not restarted</td><td>Close the editor completely and open it again on the QA repo.</td></tr>
+  </table></div>
+  <h3>Using the skills</h3>
+  <div class="table"><table>
+    <tr><th>What you see</th><th>Likely cause</th><th>What to do</th></tr>
+    <tr><td>"Run /qa-knowledge-setup build first"</td><td>No knowledge yet for this area</td><td>Run <code>/qa-knowledge-setup build &lt;folder or suite&gt;</code>.</td></tr>
+    <tr><td>Knowledge is out of date</td><td>The repo changed since the last build</td><td>Run <code>/qa-knowledge-setup refresh</code>.</td></tr>
+    <tr><td>The build stopped (editor closed or crashed)</td><td>Interrupted</td><td>Run <code>/qa-knowledge-setup refresh</code>. It continues where it stopped.</td></tr>
+    <tr><td>A test is BLOCKED at login or a database step</td><td>The environment, not the script</td><td>Check that the environment is up and your access works. The AI proves this with one of your existing tests.</td></tr>
+    <tr><td><code>qtest TC-…</code> was not found</td><td>Wrong ID or project</td><td>Check the ID in qTest and the project in your <code>.env</code>.</td></tr>
+    <tr><td>qTest refused the token</td><td>The token expired</td><td>Create a new token in qTest and run <code>qa-ai-setup install --force</code>; it asks for the new token.</td></tr>
+    <tr><td>Cloning a development repo failed</td><td>No access to that repository</td><td>Check you can clone it yourself. The QA knowledge is still built without it.</td></tr>
+    <tr><td>Port 9222 is busy</td><td>Another program uses it</td><td>Close that program, or ask the skills owner to change the port.</td></tr>
+  </table></div>
+  <div class="note info"><b>Still stuck?</b>Run <code>qa-ai-setup check</code> and send the output together with <code>qa-ai-data/results/setup-log.txt</code> to the QA AI skills owner.</div>
+</section>
+
+<!-- 10 -->
+<section id="safety">
+  <h2><span class="n">10</span>Safety rules</h2>
+  <p class="lead">Built into the skills. You do not need to remember them, but it helps to know them.</p>
+  <ul>
+    <li>Test environments only. Anything that looks like production is refused.</li>
+    <li>Passwords and tokens come only from your vault, configuration or <code>.env</code>. They are never typed into the chat or shown.</li>
+    <li>Your team's tests, keywords and locators are never changed without proof and your approval.</li>
+    <li>Nothing is added to a suite, branched, committed or pushed without asking you first.</li>
+    <li>Development repositories, qTest and databases are only read, never changed.</li>
+    <li>Shared test data a test changes is put back at the end of the test.</li>
+    <li>Client data is never written into scripts, knowledge, logs or reports.</li>
+  </ul>
+</section>
+
+<!-- soon -->
+<section id="soon">
+  <h2><span class="n">★</span>Coming soon <span class="badge">In validation</span></h2>
+  <p class="lead">These features are built and being validated. They are not part of this release yet, so please do not use them for now.</p>
+  <div class="cards">
+    <div class="card soon"><h4>Coverage map</h4><p>Shows which screens, fields, buttons, business rules and APIs of the application your automated tests cover, and how well.</p></div>
+    <div class="card soon"><h4>Gap analysis</h4><p>Lists what is not covered yet, ranked by risk, so the team knows what to automate next.</p></div>
+    <div class="card soon"><h4>Regression gap analysis</h4><p>For a release, shows what changed in the application, which existing tests to run, and which changes no test covers.</p></div>
+    <div class="card soon"><h4>Automating the gaps</h4><p>Turns the top coverage gaps into test cases and generates their scripts in one batch.</p></div>
+  </div>
+</section>
+
+<footer>QA AI Skills · User Guide · Version 0.1 · For internal use by QA teams.</footer>
+</div>
+</main>
+
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('.side a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'))});
+  function onScroll(){
+    var y=window.scrollY+110, cur=0;
+    secs.forEach(function(s,i){ if(s && s.offsetTop<=y) cur=i; });
+    if(window.innerHeight+window.scrollY>=document.body.scrollHeight-4) cur=secs.length-1;
+    links.forEach(function(a,i){a.classList.toggle('active',i===cur)});
+  }
+  links.forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('nav-open')})});
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+})();
+</script>
+</body>
+</html>
